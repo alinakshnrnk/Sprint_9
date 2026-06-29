@@ -26,7 +26,7 @@ class RegistrationPage(BasePage):
     @allure.step("Проверить, что открылась страница авторизации")
     def is_login_page_opened(self):
         try:
-            self.wait.until(EC.url_contains("/signin"))
+            self.wait_for_url("/signin")
             return True
         except Exception:
             return False
@@ -34,3 +34,10 @@ class RegistrationPage(BasePage):
     @allure.step("Проверить, что форма авторизации отображается")
     def is_login_form_visible(self):
         return self.is_visible(RegistrationPageLocators.LOGIN_FORM)
+
+    @allure.step("Зарегистрировать пользователя")
+    def register_user(self, first_name, last_name, username, email, password):
+        self.open_registration_form()
+        self.fill_registration_form(first_name, last_name, username, email, password)
+        self.submit_registration()
+        self.wait_for_url("/signin")

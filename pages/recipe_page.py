@@ -1,6 +1,5 @@
 import allure
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
 from pages.base_page import BasePage
 from locators.recipe_page_locators import RecipePageLocators
 from data.test_data import URLS
@@ -28,23 +27,14 @@ class RecipePage(BasePage):
             input_el.send_keys(char)
             self.wait.until(lambda d: input_el.get_attribute("value") != "")
 
-        self.wait.until(
-            EC.visibility_of_element_located(RecipePageLocators.INGREDIENT_DROPDOWN_ITEM)
-        )
+        self.find_visible(RecipePageLocators.INGREDIENT_DROPDOWN_ITEM)
         self.click(RecipePageLocators.INGREDIENT_DROPDOWN_ITEM)
 
-        self.wait.until(
-            EC.visibility_of_element_located(RecipePageLocators.INGREDIENT_AMOUNT_INPUT)
-        )
+        self.find_visible(RecipePageLocators.INGREDIENT_AMOUNT_INPUT)
         self.enter_text(RecipePageLocators.INGREDIENT_AMOUNT_INPUT, amount)
 
-        add_btn = self.find_element(RecipePageLocators.ADD_INGREDIENT_BUTTON)
-        self.driver.execute_script("arguments[0].scrollIntoView(true);", add_btn)
-        self.driver.execute_script("arguments[0].click();", add_btn)
-
-        self.wait.until(
-            EC.visibility_of_element_located(RecipePageLocators.INGREDIENT_ADDED_ITEM)
-        )
+        self.js_click(RecipePageLocators.ADD_INGREDIENT_BUTTON)
+        self.find_visible(RecipePageLocators.INGREDIENT_ADDED_ITEM)
 
     @allure.step("Ввести время приготовления")
     def enter_cooking_time(self, cooking_time):
@@ -56,13 +46,8 @@ class RecipePage(BasePage):
 
     @allure.step("Нажать кнопку 'Создать рецепт'")
     def submit_recipe(self):
-        self.wait.until(
-            EC.element_to_be_clickable(RecipePageLocators.SUBMIT_BUTTON_ACTIVE)
-        )
-        button = self.find_element(RecipePageLocators.SUBMIT_BUTTON_ACTIVE)
-        self.driver.execute_script("arguments[0].scrollIntoView(true);", button)
-        button.click()
-        self.wait.until(EC.url_contains("/recipes/"))
+        self.js_click(RecipePageLocators.SUBMIT_BUTTON_ACTIVE)
+        self.wait_for_url("/recipes/")
 
     @allure.step("Проверить, что страница рецепта открылась")
     def is_recipe_card_visible(self):

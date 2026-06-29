@@ -19,19 +19,12 @@ class LoginPage(BasePage):
     @allure.step("Нажать кнопку 'Войти'")
     def submit_login(self):
         self.click(LoginPageLocators.SUBMIT_BUTTON)
-        self._dismiss_alert_if_present()
-
-    def _dismiss_alert_if_present(self):
-        try:
-            self.wait.until(EC.alert_is_present())
-            self.driver.switch_to.alert.accept()
-        except Exception:
-            pass
+        self.dismiss_alert_if_present()
 
     @allure.step("Проверить, что открылась главная страница")
     def is_main_page_opened(self):
         try:
-            self.wait.until(EC.url_contains("/recipes"))
+            self.wait_for_url("/recipes")
             return True
         except Exception:
             return False
