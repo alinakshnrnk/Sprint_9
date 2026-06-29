@@ -1,0 +1,81 @@
+name: Sprint 9 — Autotests with Selenoid
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - develop
+  pull_request:
+    branches:
+      - main
+      - master
+      - develop
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Pull Selenoid Chrome image
+        run: docker pull selenoid/vnc_chrome:126.0
+
+      - name: Start Selenoid
+        run: |
+          docker run -d \
+            --name selenoid \
+            -p 4444:4444 \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            -v ${{ github.workspace }}/selenoid/config:/etc/selenoid \
+            aerokube/selenoid:latest \
+            -conf /etc/selenoid/browsers.json \
+            -limit 4
+
+      - name: Wait for Selenoid to be ready
+        run: |
+          for i in $(seq 1 15); do
+            curl -s http://localhost:4444/status && break || sleep 2
+          done
+
+      - name: Run tests
+        run: |
+          pytest tests/ \
+            --selenoid-url=http://localhost:4444/wd/hub \
+            -v \
+            --alluredir=allure-results
+
+      - name: Upload Allure results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results
+          path: allure-results/
+          retention-days: 7
+
+      - name: Generate Allure report
+        if: always()
+        uses: simple-elf/allure-report-action@v1.9
+        with:
+          allure_results: allure-results
+          allure_report: allure-report
+          gh_pages: gh-pages
+          allure_history: allure-history
+
+      - name: Deploy Allure report to GitHub Pages
+        if: always()
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: allure-history
