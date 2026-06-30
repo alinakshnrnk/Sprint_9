@@ -1,8 +1,7 @@
 import allure
-from selenium.webdriver.support import expected_conditions as EC
 from pages.base_page import BasePage
 from locators.login_page_locators import LoginPageLocators
-from data.test_data import URLS
+from data.urls import URLS
 
 
 class LoginPage(BasePage):

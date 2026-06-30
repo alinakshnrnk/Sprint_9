@@ -1,8 +1,7 @@
 import allure
-from selenium.webdriver.support import expected_conditions as EC
 from pages.base_page import BasePage
 from locators.registration_page_locators import RegistrationPageLocators
-from data.test_data import URLS
+from data.urls import URLS
 
 
 class RegistrationPage(BasePage):
